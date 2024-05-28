@@ -13,7 +13,7 @@ jobs:
     - name: Create RDP user
       run: |
         $username = "jayras"
-        $password = "@jayras" | ConvertTo-SecureString -AsPlainText -Force
+        $password = "ComplexPass123!" | ConvertTo-SecureString -AsPlainText -Force
         New-LocalUser -Name $username -Password $password -FullName "RDP User" -Description "User for RDP access"
         Add-LocalGroupMember -Group "Remote Desktop Users" -Member $username
         Set-LocalUser -Name $username -PasswordNeverExpires $true
