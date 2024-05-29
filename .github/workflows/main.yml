@@ -43,3 +43,9 @@ jobs:
           Start-Sleep -Seconds 10
         }
       shell: powershell
+    - name: Run installer as admin
+      run: |
+       $password = ConvertTo-SecureString ${{ secrets.ADMIN_PASSWORD }} -AsPlainText -Force
+       $credential = New-Object System.Management.Automation.PSCredential("Administrator", $password)
+       Start-Process -FilePath "path\to\installer.exe" -Credential $credential -ArgumentList "/silent /install"
+      shell: powershell
