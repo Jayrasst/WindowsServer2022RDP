@@ -10,10 +10,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Create Administrator User
+      run: |
+        $username = "adminuser"
+        $password = ConvertTo-SecureString "AdminPass123!" -AsPlainText -Force
+        New-LocalUser -Name $username -Password $password -FullName "Admin User" -Description "Temporary Admin User"
+        Add-LocalGroupMember -Group "Administrators" -Member $username
+      shell: powershell
+
     - name: Create RDP user
       run: |
         $username = "jayras"
-        $password = "ComplexPass123!" | ConvertTo-SecureString -AsPlainText -Force
+        $password = ConvertTo-SecureString "ComplexPass123!" -AsPlainText -Force
         New-LocalUser -Name $username -Password $password -FullName "RDP User" -Description "User for RDP access"
         Add-LocalGroupMember -Group "Remote Desktop Users" -Member $username
         Set-LocalUser -Name $username -PasswordNeverExpires $true
@@ -35,9 +43,9 @@ jobs:
 
     - name: Run installer as admin
       run: |
-        $password = ConvertTo-SecureString ${{ secrets.ADMIN_PASSWORD }} -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential("Administrator", $password)
-        Start-Process -FilePath "ngrok.exe" -Credential $credential -ArgumentList "install"
+        $password = ConvertTo-SecureString "AdminPass123!" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential("adminuser", $password)
+        Start-Process -FilePath ".\ngrok.exe" -Credential $credential -ArgumentList "install"
       shell: powershell
 
     - name: Set ngrok authtoken
@@ -45,9 +53,5 @@ jobs:
       shell: powershell
 
     - name: Run ngrok for RDP
-      run: |
-        while ($true) {
-          .\ngrok.exe tcp 3389
-          Start-Sleep -Seconds 10
-        }
+      run: .\ngrok.exe tcp 3389
       shell: powershell
