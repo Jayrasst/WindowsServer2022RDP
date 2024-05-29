@@ -1,0 +1,44 @@
+name: Setup RDP and ngrok on Linux
+
+on: [push]
+
+jobs:
+  setup-rdp:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget xrdp xfce4 xfce4-goodies
+        sudo systemctl enable xrdp
+        sudo systemctl start xrdp
+
+    - name: Configure XRDP
+      run: |
+        echo xfce4-session >~/.xsession
+        sudo sed -i.bak '/fi/a #xrdp multiple users configuration\nxfce4-session\n' /etc/xrdp/startwm.sh
+        sudo service xrdp restart
+
+    - name: Download and extract ngrok
+      run: |
+        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
+        tar -xvf ngrok.tgz
+        sudo mv ngrok /usr/local/bin
+
+    - name: Set ngrok authtoken
+      run: ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+    - name: Run ngrok for RDP
+      run: |
+        nohup ngrok tcp 3389 --log=stdout > ngrok.log &
+      shell: bash
+
+    - name: Display ngrok tunnel status
+      run: |
+        sleep 5
+        curl --silent http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
+      shell: bash
