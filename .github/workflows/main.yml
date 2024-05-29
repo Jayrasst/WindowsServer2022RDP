@@ -13,7 +13,7 @@ jobs:
     - name: Create Administrator User
       run: |
         $username = "adminuser"
-        $password = ConvertTo-SecureString "AdminPass123!" -AsPlainText -Force
+        $password = ConvertTo-SecureString "C0mplexP@ssw0rd!" -AsPlainText -Force
         New-LocalUser -Name $username -Password $password -FullName "Admin User" -Description "Temporary Admin User"
         Add-LocalGroupMember -Group "Administrators" -Member $username
       shell: powershell
@@ -21,7 +21,7 @@ jobs:
     - name: Create RDP user
       run: |
         $username = "jayras"
-        $password = ConvertTo-SecureString "ComplexPass123!" -AsPlainText -Force
+        $password = ConvertTo-SecureString "AnotherC0mplexP@ssw0rd!" -AsPlainText -Force
         New-LocalUser -Name $username -Password $password -FullName "RDP User" -Description "User for RDP access"
         Add-LocalGroupMember -Group "Remote Desktop Users" -Member $username
         Set-LocalUser -Name $username -PasswordNeverExpires $true
@@ -43,7 +43,7 @@ jobs:
 
     - name: Run installer as admin
       run: |
-        $password = ConvertTo-SecureString "AdminPass123!" -AsPlainText -Force
+        $password = ConvertTo-SecureString "C0mplexP@ssw0rd!" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential("adminuser", $password)
         Start-Process -FilePath ".\ngrok.exe" -Credential $credential -ArgumentList "install"
       shell: powershell
@@ -54,4 +54,8 @@ jobs:
 
     - name: Run ngrok for RDP
       run: .\ngrok.exe tcp 3389
+      shell: powershell
+
+    - name: Delete temporary admin user
+      run: Remove-LocalUser -Name "adminuser"
       shell: powershell
